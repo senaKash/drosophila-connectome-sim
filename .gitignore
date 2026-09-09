@@ -1,0 +1,45 @@
+# Virtual environment
+.venv/
+
+# Python bytecode / cache
+__pycache__/
+*.py[cod]
+
+# Python packaging
+*.egg-info/
+build/
+dist/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Type checking / linting
+.mypy_cache/
+.ruff_cache/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Raw datasets
+data/raw/
+data/processed/
+
+# Simulation output
+results/
+
+# Local media
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# Temporary files
+*.tmp
+*.log
