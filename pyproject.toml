@@ -7,7 +7,9 @@ name = "drosophila-connectome-sim"
 version = "0.1.0"
 description = "Experimental Drosophila connectome simulator"
 requires-python = ">=3.12,<3.13"
-dependencies = []
+dependencies = [
+    "numpy>=2.0",
+]
 
 [project.optional-dependencies]
 dev = [
