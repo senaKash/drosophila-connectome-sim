@@ -72,3 +72,27 @@ def test_pending_input_is_used_on_next_step():
     network.step()
 
     assert network.neurons["B"].voltage > voltage_before
+
+def test_multiple_inputs_are_summed():
+    network = Network()
+
+    network.add_neuron("A", LIFNeuron())
+    network.add_neuron("B", LIFNeuron())
+    network.add_neuron("C", LIFNeuron())
+
+    network.connect("A", "C", weight=2.0)
+    network.connect("B", "C", weight=1.5)
+
+    # Доводим A и B до spike одновременно
+    while True:
+        spikes = network.step(
+            external_inputs={
+                "A": 2.0,
+                "B": 2.0,
+            }
+        )
+
+        if spikes["A"] and spikes["B"]:
+            break
+
+    assert network.pending_inputs["C"] == 3.5
