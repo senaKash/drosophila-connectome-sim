@@ -46,3 +46,4 @@ results/
 # Temporary files
 *.tmp
 *.log
+*.egg-info/

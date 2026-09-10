@@ -1,11 +1,11 @@
-import matplotlib.pyplot as plt
+﻿import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from PIL import Image
 
 from flysim.vision.columns import build_right_eye_columns
 from flysim.vision.eye_geometry import build_eye_geometry
-from flysim.vision.fly_view import reconstruct_fly_view
+from flysim.rendering.fly_view import reconstruct_fly_view
 from flysim.vision.image_input import (
     sample_image_brightness_from_geometry,
 )
@@ -21,7 +21,7 @@ IMAGE_PATH = "data/input/test.png"
 
 def load_image(path: str) -> np.ndarray:
     """
-    Загружает картинку в grayscale и переводит в диапазон [0, 1].
+    Р—Р°РіСЂСѓР¶Р°РµС‚ РєР°СЂС‚РёРЅРєСѓ РІ grayscale Рё РїРµСЂРµРІРѕРґРёС‚ РІ РґРёР°РїР°Р·РѕРЅ [0, 1].
     """
     image = Image.open(path).convert("L")
 
@@ -32,7 +32,7 @@ def load_image(path: str) -> np.ndarray:
 
 
 def main() -> None:
-    # 1. Загружаем аннотации только с нужными колонками
+    # 1. Р—Р°РіСЂСѓР¶Р°РµРј Р°РЅРЅРѕС‚Р°С†РёРё С‚РѕР»СЊРєРѕ СЃ РЅСѓР¶РЅС‹РјРё РєРѕР»РѕРЅРєР°РјРё
     annotations = pd.read_feather(
         ANNOTATIONS_PATH,
         columns=[
@@ -43,21 +43,21 @@ def main() -> None:
         ],
     )
 
-    # 2. Строим right-eye visual columns
+    # 2. РЎС‚СЂРѕРёРј right-eye visual columns
     columns = build_right_eye_columns(
         annotations
     )
 
-    # 3. Строим геометрию глаза
+    # 3. РЎС‚СЂРѕРёРј РіРµРѕРјРµС‚СЂРёСЋ РіР»Р°Р·Р°
     geometry = build_eye_geometry(
         hex1=columns["hex1"].to_numpy(),
         hex2=columns["hex2"].to_numpy(),
     )
 
-    # 4. Загружаем исходную картинку
+    # 4. Р—Р°РіСЂСѓР¶Р°РµРј РёСЃС…РѕРґРЅСѓСЋ РєР°СЂС‚РёРЅРєСѓ
     image = load_image(IMAGE_PATH)
 
-    # 5. Сэмплируем яркость изображения в направления visual columns
+    # 5. РЎСЌРјРїР»РёСЂСѓРµРј СЏСЂРєРѕСЃС‚СЊ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ РІ РЅР°РїСЂР°РІР»РµРЅРёСЏ visual columns
     samples = sample_image_brightness_from_geometry(
         image=image,
         geometry=geometry,
@@ -68,7 +68,7 @@ def main() -> None:
 
     brightness = samples["brightness"].to_numpy()
 
-    # 6. Восстанавливаем fly POV как blocky-картинку из прямоугольников
+    # 6. Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµРј fly POV РєР°Рє blocky-РєР°СЂС‚РёРЅРєСѓ РёР· РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРєРѕРІ
     fly_view = reconstruct_fly_view(
         geometry=geometry,
         brightness=brightness,
@@ -77,7 +77,7 @@ def main() -> None:
         eye_aspect=1.25,
     )
 
-    # 7. Печатаем краткую статистику
+    # 7. РџРµС‡Р°С‚Р°РµРј РєСЂР°С‚РєСѓСЋ СЃС‚Р°С‚РёСЃС‚РёРєСѓ
     print("FLY VIEW")
     print("--------")
     print("Visual columns:", len(brightness))
@@ -94,7 +94,7 @@ def main() -> None:
         ].head(10).to_string(index=False)
     )
 
-    # 8. Показываем слева оригинал, справа reconstructed fly POV
+    # 8. РџРѕРєР°Р·С‹РІР°РµРј СЃР»РµРІР° РѕСЂРёРіРёРЅР°Р», СЃРїСЂР°РІР° reconstructed fly POV
     plt.figure(figsize=(12, 5))
 
     plt.subplot(1, 2, 1)
