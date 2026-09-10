@@ -74,6 +74,7 @@ class BrainActivityRenderer:
             s=3,
             c=colors,
             alpha=0.9,
+            #depthshade=False, убирает глубину
         )
 
         ax.set_proj_type("ortho")
