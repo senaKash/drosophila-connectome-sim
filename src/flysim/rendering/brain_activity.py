@@ -55,7 +55,7 @@ class BrainActivityRenderer:
 
         return colors
 
-    def render(self, colors):
+    def render(self, colors, output_path=None):
         fig = plt.figure(
             figsize=(10, 8),
             facecolor="black",
@@ -97,4 +97,15 @@ class BrainActivityRenderer:
         ax.set_axis_off()
 
         plt.tight_layout()
-        plt.show()
+
+        # Старый рабочий вариант для просмотра одного кадра.
+        # plt.show()
+
+        if output_path is None:
+            plt.show()
+        else:
+            fig.savefig(
+                output_path,
+                facecolor="black",
+            )
+            plt.close(fig)
