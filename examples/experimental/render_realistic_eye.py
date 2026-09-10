@@ -1,4 +1,4 @@
-import matplotlib.pyplot as plt
+﻿import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from PIL import Image
@@ -9,7 +9,7 @@ from flysim.vision.columns import (
 from flysim.vision.eye_geometry import (
     build_eye_geometry,
 )
-from flysim.vision.eye_render import (
+from flysim.rendering.eye_render import (
     render_eye,
 )
 from flysim.vision.image_input import (
