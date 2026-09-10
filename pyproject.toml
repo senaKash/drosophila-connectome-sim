@@ -13,6 +13,8 @@ dependencies = [
     "pyarrow>=17",
     "matplotlib>=3.9",
     "pillow>=10",
+    "brian2",
+    "flygym==2.1.0",
 ]
 
 [project.optional-dependencies]
