@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class NeuronIndex:
     def __init__(self, body_ids):
         body_ids = [int(body_id) for body_id in body_ids]
@@ -28,3 +31,21 @@ class NeuronIndex:
             raise IndexError(f"Neuron index out of range: {index}")
 
         return self.body_ids[index]
+
+
+def build_malecns_neuron_index(annotations) -> NeuronIndex:
+    """Build the network index from bodyId and superclass annotation columns.
+
+    IDs are unique and sorted, independently of soma locations or edges.
+    """
+    valid_rows = (
+        annotations["superclass"].notna()
+        & ~annotations["superclass"].str.contains(
+            "tbc",
+            case=False,
+            na=False,
+        )
+    )
+    body_ids = annotations.loc[valid_rows, "bodyId"].to_numpy(dtype=np.int64)
+
+    return NeuronIndex(np.unique(body_ids))

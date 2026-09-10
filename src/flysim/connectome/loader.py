@@ -1,10 +1,56 @@
+import ast
+
 import numpy as np
 import csv
 import pyarrow.feather as feather
 
 
-from flysim.connectome.neuron_index import NeuronIndex
+from flysim.connectome.neuron_index import NeuronIndex, build_malecns_neuron_index
 from flysim.simulation.connectivity import SparseConnectivity
+
+
+def build_soma_mapping(
+    annotations,
+    neuron_index: NeuronIndex,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return aligned body_ids, network_indices and soma points (M, 3).
+
+    annotations is a DataFrame with bodyId and somaLocation columns.
+    Rows retain annotation order; network_indices always come from the
+    supplied NeuronIndex. Neurons outside that index and rows without a
+    somaLocation are omitted. The full network index is never modified.
+    """
+    required_columns = {"bodyId", "somaLocation"}
+    if not required_columns.issubset(annotations.columns):
+        raise ValueError("annotations must contain bodyId and somaLocation")
+
+    soma_rows = annotations[
+        annotations["bodyId"].isin(neuron_index.body_ids)
+        & annotations["somaLocation"].notna()
+    ]
+
+    if soma_rows["bodyId"].duplicated().any():
+        raise ValueError("somaLocation must be unique per network bodyId")
+
+    body_ids = soma_rows["bodyId"].to_numpy(dtype=np.int64)
+    network_indices = np.array(
+        [neuron_index.to_index(body_id) for body_id in body_ids],
+        dtype=int,
+    )
+
+    points = np.empty((len(body_ids), 3), dtype=float)
+    for i, value in enumerate(soma_rows["somaLocation"]):
+        if isinstance(value, str):
+            value = ast.literal_eval(value)
+        location = np.asarray(value, dtype=float)
+        if location.shape != (3,) or not np.isfinite(location).all():
+            raise ValueError(
+                f"somaLocation for bodyId {body_ids[i]} "
+                "must contain three finite coordinates"
+            )
+        points[i] = location
+
+    return body_ids, network_indices, points
 
 
 def build_connectivity(
@@ -136,22 +182,8 @@ def load_malecns_feather(
         columns=["bodyId", "superclass"],
     )
 
-    valid_annotations = annotations[
-        annotations["superclass"].notna()
-        & ~annotations["superclass"].str.contains(
-            "tbc",
-            case=False,
-            na=False,
-        )
-    ]
-
-    # np.unique одновременно убирает возможные дубликаты
-    # и сортирует ID.
-    valid_body_ids = np.unique(
-        valid_annotations["bodyId"].to_numpy(
-            dtype=np.int64
-        )
-    )
+    neuron_index = build_malecns_neuron_index(annotations)
+    valid_body_ids = np.asarray(neuron_index.body_ids, dtype=np.int64)
 
     valid_body_ids_arrow = pa.array(valid_body_ids)
 
@@ -240,10 +272,6 @@ def load_malecns_feather(
     source_indices = np.concatenate(source_chunks)
     target_indices = np.concatenate(target_chunks)
     weights = np.concatenate(weight_chunks)
-
-    neuron_index = NeuronIndex(
-        valid_body_ids.tolist()
-    )
 
     connectivity = SparseConnectivity(
         size=len(neuron_index),
